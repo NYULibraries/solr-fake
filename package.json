@@ -1,6 +1,6 @@
 {
   "name": "dlts-solr-fake",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "DLTS Solr Fake",
   "main": "index.js",
   "repository": "https://github.com/nyulibraries/dlts-solr-fake",
