@@ -5,9 +5,6 @@ const argv = require( 'minimist' )( process.argv.slice( 2 ) );
 const solrFake = require( './' );
 
 let solrResponsesDirectory = argv._[ 0 ];
-if ( solrResponsesDirectory ) {
-    solrResponsesDirectory = fs.realpathSync( solrResponsesDirectory );
-}
 
 const port = argv.port || undefined;
 
