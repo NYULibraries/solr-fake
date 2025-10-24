@@ -66,7 +66,7 @@ function getSolrResponseFilename( queryString ) {
 }
 
 function getSolrResponseFilePath( responseFile ) {
-    return path.join( solrResponsesDirectory, responseFile )
+    return path.resolve( solrResponsesDirectory, responseFile )
 }
 
 async function getSolrResponseFromLiveSolr( queryString ) {
@@ -150,30 +150,34 @@ function signalEventHandler( signal, code ) {
     process.exit( code );
 }
 
-function startSolrFake(
-    solrResponsesDirectoryArg,
-    portArg,
-    updateSolrResponsesSolrServerUrlArg,
-    verbose,
-    ) {
+function startSolrFake( options ) {
 
     console.log( 'Logging to ' + logfile );
 
-    if ( verbose ) {
+    if ( options.verbose ) {
         logger.add( new transports.Console() );
     }
 
-    solrResponsesDirectory = solrResponsesDirectoryArg;
+    solrResponsesDirectory = options.solrResponsesDirectory;
     solrResponsesIndex = path.resolve( solrResponsesDirectory, INDEX_FILE );
 
-    const port = portArg || DEFAULT_PORT;
+    const port = options.port || DEFAULT_PORT;
 
     let handler;
-    if ( updateSolrResponsesSolrServerUrlArg  ) {
-        updateSolrResponsesSolrServerUrl = updateSolrResponsesSolrServerUrlArg;
+    if ( options.updateSolrResponsesSolrServerUrl  ) {
+        updateSolrResponsesSolrServerUrl = options.updateSolrResponsesSolrServerUrl;
 
         logger.info( 'Switching to update Solr responses mode' );
         logger.info( `Solr server = ${ updateSolrResponsesSolrServerUrl }` );
+
+        if ( ! fs.existsSync( solrResponsesIndex ) ) {
+            // Assume that user has provided a correct index path and is using the
+            // update feature to create a new set of fixtures.  Create the directory
+            // (whether it exists or not) and initialize the index file.
+            fs.mkdirSync( solrResponsesDirectory, { recursive: true } );
+            fs.writeFileSync( solrResponsesIndex, '{}', { encoding: 'utf8' } );
+            logger.info( `Initialized new fixtures index: ${ solrResponsesIndex }` );
+        }
 
         handler = updateSolrResponsesHandler;
     } else {
