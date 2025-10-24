@@ -1,9 +1,9 @@
 {
-  "name": "dlts-solr-fake",
+  "name": "solr-fake",
   "version": "0.2.0",
-  "description": "DLTS Solr Fake",
+  "description": "Solr Fake",
   "main": "index.js",
-  "repository": "https://github.com/nyulibraries/dlts-solr-fake",
+  "repository": "https://github.com/nyulibraries/solr-fake",
   "author": "da70",
   "license": "Apache License v2",
   "dependencies": {
