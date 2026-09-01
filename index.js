@@ -1,4 +1,3 @@
-const axios     = require( 'axios' );
 const crypto    = require( 'crypto' );
 const fs        = require( 'fs' );
 const http      = require( 'http' );
@@ -71,11 +70,11 @@ function getSolrResponseFilePath( responseFile ) {
 
 async function getSolrResponseFromLiveSolr( queryString ) {
     try {
-        const request = updateSolrResponsesSolrServerUrl + queryString;
+        const requestUrl = updateSolrResponsesSolrServerUrl + queryString;
 
-        const response = await axios.get( request );
+        const response = await fetch( decodeURIComponent( requestUrl ) );
 
-        return response.data;
+        return await response.json();
     } catch( error ) {
         logger.error( error );
     }
@@ -231,18 +230,17 @@ async function updateSolrResponsesHandler( request, response ) {
 
     const normalizedQueryString = normalizeQueryString( queryString );
 
-    const solrResponse = await getSolrResponseFromLiveSolr( normalizedQueryString );
+    const solrResponseJson = await getSolrResponseFromLiveSolr( normalizedQueryString );
+    const solrResponseText = stableStringify( solrResponseJson )
 
-    const solrResponseString = stableStringify( solrResponse );
-
-    updateSolrResponses( normalizedQueryString, solrResponseString );
+    updateSolrResponses( normalizedQueryString, solrResponseText );
 
     response.writeHead( 200, {
         "Access-Control-Allow-Origin" : "*",
         "Content-Type"                : "text/plain;charset=utf-8",
     } );
 
-    response.write( solrResponseString );
+    response.write( solrResponseText );
     response.end();
 }
 
