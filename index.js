@@ -5,12 +5,9 @@ import { createRequire } from 'node:module';
 import * as path from 'node:path';
 import * as url from 'node:url';
 
-import winston, {} from 'winston';
 import stringify, {} from 'json-stable-stringify';
 
 const require = createRequire( import.meta.url );
-
-const { printf } = winston.format;
 
 const DEFAULT_PORT = 3000;
 
@@ -20,12 +17,7 @@ let solrResponses;
 let solrResponsesIndex;
 let solrResponsesDirectory;
 let updateSolrResponsesSolrServerUrl;
-
-const customFormat = printf( info => {
-    const timestamp = new Date().toString();
-
-    return `${ timestamp } [${ info.level }]: ${ info.message }`;
-} );
+let verbose;
 
 const logdir = path.join( '/tmp', 'solr-fake-logs/' );
 
@@ -36,14 +28,11 @@ if ( !existsSync( logdir ) ) {
 const logfile = getLogfile( logdir );
 
 // This logger is closed over by the process.on(...) handlers, so this is in
-// global scope where where the handlers are defined.
-const logger = winston.createLogger( {
-                                 level      : 'info',
-                                 format     : customFormat,
-                                 transports : [
-                                     new winston.transports.File( { filename : logfile } ),
-                                 ],
-                             } );
+// global scope where the handlers are defined.
+const logger = {
+    error: ( message ) => { log( 'error', message ); },
+    info: ( message ) => { log( 'info', message ); },
+};
 
 function exitHandler( code ) {
     const timestamp = timestampEST();
@@ -97,6 +86,21 @@ function getSolrResponses() {
     } );
 
     return data;
+}
+
+function log( level, message ) {
+    // Not bothering to validate `level` because everything is logged the same
+    // for now.  This function was put in place when removing dependencies like
+    // the `winston` (logging) package.  We can beef it up later if we want.
+    const logLine = `${ new Date().toString() } [${ level }]: ${ message }\n`;
+
+    if ( verbose ) {
+        // We log everything to stdout, including errors.
+        console.log( logLine )
+    }
+
+    // Log to file.
+    writeFileSync( logfile, logLine );
 }
 
 function normalHandler( request, response ) {
@@ -157,7 +161,7 @@ function startSolrFake( options ) {
     console.log( 'Logging to ' + logfile );
 
     if ( options.verbose ) {
-        logger.add( new winston.transports.Console() );
+        verbose = true;
     }
 
     solrResponsesDirectory = options.solrResponsesDirectory;
