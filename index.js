@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import * as http from 'node:http';
 import { createRequire } from 'node:module';
 import * as path from 'node:path';
+import * as process from 'node:process';
 import * as url from 'node:url';
 
 import stringify, {} from 'json-stringify-deterministic';
