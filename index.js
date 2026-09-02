@@ -35,7 +35,7 @@ const logger = {
 };
 
 function exitHandler( code ) {
-    const timestamp = timestampEST();
+    const timestamp = new Date().toString();
 
     logger.info( `Exited with code ${ code } at ${ timestamp }` );
 };
