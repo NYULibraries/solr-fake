@@ -1,14 +1,17 @@
-const crypto    = require( 'crypto' );
-const fs        = require( 'fs' );
-const http      = require( 'http' );
-const moment    = require( 'moment' );
-const path      = require( 'path' );
-const url       = require( 'url' );
+import { createHmac } from 'node:crypto';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import * as http from 'node:http';
+import { createRequire } from 'node:module';
+import * as path from 'node:path';
+import * as url from 'node:url';
 
-const { createLogger, format, transports } = require( 'winston' );
-const { combine, timestamp, label, printf } = format;
+import moment, {} from 'moment';
+import winston, {} from 'winston';
+import stringify, {} from 'json-stable-stringify';
 
-const stringify = require( 'json-stable-stringify' );
+const require = createRequire( import.meta.url );
+
+const { printf } = winston.format;
 
 const DEFAULT_PORT = 3000;
 
@@ -27,19 +30,19 @@ const customFormat = printf( info => {
 
 const logdir = path.join( '/tmp', 'solr-fake-logs/' );
 
-if ( ! fs.existsSync( logdir ) ) {
-    fs.mkdirSync( logdir );
+if ( !existsSync( logdir ) ) {
+    mkdirSync( logdir );
 }
 
 const logfile = getLogfile( logdir );
 
 // This logger is closed over by the process.on(...) handlers, so this is in
 // global scope where where the handlers are defined.
-const logger = createLogger( {
-                                 level : 'info',
-                                 format: customFormat,
+const logger = winston.createLogger( {
+                                 level      : 'info',
+                                 format     : customFormat,
                                  transports : [
-                                     new transports.File( { filename : logfile } ),
+                                     new winston.transports.File( { filename : logfile } ),
                                  ],
                              } );
 
@@ -52,12 +55,12 @@ function exitHandler( code ) {
 function getLogfile( logdir ) {
     return path.join(
         logdir,
-        'solr-fake-' + moment( new Date() ).format( 'YYYY-MM-DDTHH-mm-ss' )
+           'solr-fake-' + moment( new Date() ).format( 'YYYY-MM-DDTHH-mm-ss' )
     ) + '.log';
 }
 
 function getSolrResponseFilename( queryString ) {
-    const hash = crypto.createHmac( 'sha256', queryString )
+    const hash = createHmac( 'sha256', queryString )
         .update( queryString )
         .digest( 'hex' );
 
@@ -75,7 +78,7 @@ async function getSolrResponseFromLiveSolr( queryString ) {
         const response = await fetch( decodeURIComponent( requestUrl ) );
 
         return await response.json();
-    } catch( error ) {
+    } catch ( error ) {
         logger.error( error );
     }
 }
@@ -101,7 +104,7 @@ function normalHandler( request, response ) {
 
     const queryString = requestUrl.search;
 
-    if ( ! queryString ) {
+    if ( !queryString ) {
         return;
     }
 
@@ -109,7 +112,7 @@ function normalHandler( request, response ) {
 
     let solrResponse = solrResponses[ normalizedQueryString ];
 
-    if ( ! solrResponse ) {
+    if ( !solrResponse ) {
         const errorMessage = `Query string "${ queryString }" not found in index`;
 
         solrResponse = {
@@ -119,7 +122,7 @@ function normalHandler( request, response ) {
         logger.error( errorMessage );
     }
 
-    const solrResponseString = stringify( solrResponse, { space: '    ' } );
+    const solrResponseString = stringify( solrResponse, { space : '    ' } );
 
     response.writeHead( 200, {
         "Access-Control-Allow-Origin" : "*",
@@ -154,7 +157,7 @@ function startSolrFake( options ) {
     console.log( 'Logging to ' + logfile );
 
     if ( options.verbose ) {
-        logger.add( new transports.Console() );
+        logger.add( new winston.transports.Console() );
     }
 
     solrResponsesDirectory = options.solrResponsesDirectory;
@@ -163,18 +166,18 @@ function startSolrFake( options ) {
     const port = options.port || DEFAULT_PORT;
 
     let handler;
-    if ( options.updateSolrResponsesSolrServerUrl  ) {
+    if ( options.updateSolrResponsesSolrServerUrl ) {
         updateSolrResponsesSolrServerUrl = options.updateSolrResponsesSolrServerUrl;
 
         logger.info( 'Switching to update Solr responses mode' );
         logger.info( `Solr server = ${ updateSolrResponsesSolrServerUrl }` );
 
-        if ( ! fs.existsSync( solrResponsesIndex ) ) {
+        if ( !existsSync( solrResponsesIndex ) ) {
             // Assume that user has provided a correct index path and is using the
             // update feature to create a new set of fixtures.  Create the directory
             // (whether it exists or not) and initialize the index file.
-            fs.mkdirSync( solrResponsesDirectory, { recursive: true } );
-            fs.writeFileSync( solrResponsesIndex, '{}', { encoding: 'utf8' } );
+            mkdirSync( solrResponsesDirectory, { recursive : true } );
+            writeFileSync( solrResponsesIndex, '{}', { encoding : 'utf8' } );
             logger.info( `Initialized new fixtures index: ${ solrResponsesIndex }` );
         }
 
@@ -203,18 +206,18 @@ function stableStringify( data ) {
 }
 
 function updateSolrResponses( queryString, solrResponse ) {
-    const index = fs.existsSync( solrResponsesIndex ) ?
-                      require( solrResponsesIndex )   :
-                      {};
+    const index = existsSync( solrResponsesIndex ) ?
+                  require( solrResponsesIndex ) :
+                  {};
 
     const responseFilename = getSolrResponseFilename( queryString );
     const responseFilePath = getSolrResponseFilePath( responseFilename );
 
     index[ queryString ] = responseFilename;
 
-    fs.writeFileSync( responseFilePath, solrResponse );
+    writeFileSync( responseFilePath, solrResponse );
 
-    fs.writeFileSync( solrResponsesIndex, stableStringify( index ) );
+    writeFileSync( solrResponsesIndex, stableStringify( index ) );
 
     logger.info( `Updated Solr response "${ queryString }" : ${ responseFilename }` );
 }
@@ -224,7 +227,7 @@ async function updateSolrResponsesHandler( request, response ) {
 
     const queryString = requestUrl.search;
 
-    if ( ! queryString ) {
+    if ( !queryString ) {
         return;
     }
 
@@ -248,4 +251,6 @@ function timestampEST() {
     return moment( new Date() ).format( 'ddd, D MMM YYYY H:m:s ' ) + 'EST';
 }
 
-module.exports.startSolrFake = startSolrFake;
+export {
+    startSolrFake
+};

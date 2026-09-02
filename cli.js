@@ -1,6 +1,10 @@
-const fs = require( 'fs' );
+import { createRequire } from 'node:module';
 
-const argv = require( 'minimist' )( process.argv.slice( 2 ) );
+import minimist, {} from 'minimist';
+
+const require = createRequire(import.meta.url);
+
+const argv = minimist( process.argv.slice( 2 ) );
 
 const solrFake = require( './' );
 
