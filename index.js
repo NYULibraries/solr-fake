@@ -38,7 +38,7 @@ function exitHandler( code ) {
     const timestamp = new Date().toString();
 
     logger.info( `Exited with code ${ code } at ${ timestamp }` );
-};
+}
 
 function getLogfile( logdir ) {
     // date.toISOString(); // 2020-05-12T23:50:21.817Z
