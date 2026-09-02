@@ -5,7 +5,6 @@ import { createRequire } from 'node:module';
 import * as path from 'node:path';
 import * as url from 'node:url';
 
-import moment, {} from 'moment';
 import winston, {} from 'winston';
 import stringify, {} from 'json-stable-stringify';
 
@@ -23,7 +22,7 @@ let solrResponsesDirectory;
 let updateSolrResponsesSolrServerUrl;
 
 const customFormat = printf( info => {
-    const timestamp = timestampEST();
+    const timestamp = new Date().toString();
 
     return `${ timestamp } [${ info.level }]: ${ info.message }`;
 } );
@@ -53,10 +52,11 @@ function exitHandler( code ) {
 };
 
 function getLogfile( logdir ) {
-    return path.join(
-        logdir,
-           'solr-fake-' + moment( new Date() ).format( 'YYYY-MM-DDTHH-mm-ss' )
-    ) + '.log';
+    // date.toISOString(); // 2020-05-12T23:50:21.817Z
+    const timestampForFilename = new Date().toISOString()
+        .replaceAll( ':', '-', )
+        .replace( /\.\d{3}Z$/, '' );
+    return path.join( logdir, 'solr-fake-' + timestampForFilename ) + '.log';
 }
 
 function getSolrResponseFilename( queryString ) {
@@ -245,10 +245,6 @@ async function updateSolrResponsesHandler( request, response ) {
 
     response.write( solrResponseText );
     response.end();
-}
-
-function timestampEST() {
-    return moment( new Date() ).format( 'ddd, D MMM YYYY H:m:s ' ) + 'EST';
 }
 
 export {
