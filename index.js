@@ -150,7 +150,7 @@ function normalizeQueryString( queryString ) {
 }
 
 function signalEventHandler( signal, code ) {
-    const timestamp = timestampEST();
+    const timestamp = new Date().toString();
 
     logger.info( `Received ${ signal } at ${ timestamp }` );
 
