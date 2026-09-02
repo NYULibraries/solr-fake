@@ -80,6 +80,7 @@ function getSolrResponses() {
     Object.keys( index ).forEach( queryString => {
         const file = getSolrResponseFilePath( index[ queryString ] );
 
+        // Temp var for easier line debugging.
         const response = require( file );
 
         data[ normalizeQueryString( queryString ) ] = response;
