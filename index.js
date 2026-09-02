@@ -145,7 +145,7 @@ function normalizeQueryString( queryString ) {
 }
 
 function signalEventHandler( signal, code ) {
-    const timestamp = moment( new Date() ).format( "ddd, D MMM YYYY H:m:s " ) + 'EST';
+    const timestamp = timestampEST();
 
     logger.info( `Received ${ signal } at ${ timestamp }` );
 
