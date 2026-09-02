@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import * as path from 'node:path';
 import * as url from 'node:url';
 
-import stringify, {} from 'json-stable-stringify';
+import stringify, {} from 'json-stringify-deterministic';
 
 const require = createRequire( import.meta.url );
 
