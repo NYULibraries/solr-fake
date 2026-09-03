@@ -159,7 +159,6 @@ function signalEventHandler( signal, code ) {
 }
 
 function startSolrFake( options ) {
-
     console.log( 'Logging to ' + logfile );
 
     if ( options.verbose ) {
