@@ -158,6 +158,10 @@ function signalEventHandler( signal, code ) {
     process.exit( code );
 }
 
+function stableStringify( data ) {
+    return stringify( data, { space : '    ' } );
+}
+
 function startSolrFake( options ) {
     console.log( 'Logging to ' + logfile );
 
@@ -204,10 +208,6 @@ function startSolrFake( options ) {
     process.on( 'SIGINT', signalEventHandler );
     process.on( 'SIGTERM', signalEventHandler );
     process.on( 'exit', exitHandler );
-}
-
-function stableStringify( data ) {
-    return stringify( data, { space : '    ' } );
 }
 
 function updateSolrResponses( queryString, solrResponse ) {
