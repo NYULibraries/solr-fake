@@ -253,5 +253,5 @@ async function updateSolrResponsesHandler( request, response ) {
 }
 
 export {
-    startSolrFake
+    startSolrFake,
 };
