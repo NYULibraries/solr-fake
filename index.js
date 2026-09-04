@@ -42,10 +42,10 @@ function exitHandler( code ) {
 }
 
 function getLogfile( logdir ) {
-    // date.toISOString(); // 2020-05-12T23:50:21.817Z
-    const timestampForFilename = new Date().toISOString()
-        .replaceAll( ':', '-', )
-        .replace( /\.\d{3}Z$/, '' );
+    const timestampForFilename = new Date().toLocaleString('en-CA', { hour12: false } )
+        .replace(', ','T')
+        .replaceAll( ':', '-' );
+
     return path.join( logdir, 'solr-fake-' + timestampForFilename ) + '.log';
 }
 
