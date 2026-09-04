@@ -1,22 +1,34 @@
-import { createRequire } from 'node:module';
+import { parseArgs } from 'node:util';
 
-import minimist, {} from 'minimist';
+import { startSolrFake } from './index.js';
 
-const require = createRequire(import.meta.url);
+const options = {
+    port: {
+        type: 'string',
+    },
+    'update-solr-responses-solr-server-url': {
+        type: 'string'
+    },
+    verbose: {
+        type: 'boolean',
+        default: false,
+    }
+}
 
-const argv = minimist( process.argv.slice( 2 ) );
+const {
+    values,
+    positionals,
+} = parseArgs( { options, strict: true, allowPositionals: true } );
 
-const solrFake = require( './' );
+let solrResponsesDirectory = positionals[ 0 ];
 
-let solrResponsesDirectory = argv._[ 0 ];
+const port = values.port || undefined;
 
-const port = argv.port || undefined;
+const verbose = values.verbose|| undefined;
 
-const verbose = argv.verbose|| undefined;
+const updateSolrResponsesSolrServerUrl = values[ 'update-solr-responses-solr-server-url' ] || undefined;
 
-const updateSolrResponsesSolrServerUrl = argv[ 'update-solr-responses-solr-server-url' ] || undefined;
-
-solrFake.startSolrFake(
+startSolrFake(
     {
         solrResponsesDirectory,
         port,
