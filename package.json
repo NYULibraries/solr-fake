@@ -1,6 +1,6 @@
 {
   "name": "solr-fake",
-  "version": "0.3.0",
+  "version": "v0.4.0",
   "description": "Solr Fake",
   "main": "index.js",
   "repository": "https://github.com/nyulibraries/solr-fake",
