@@ -14,6 +14,7 @@ const DEFAULT_PORT = 3000;
 
 const INDEX_FILE = 'index.json';
 
+let server;
 let solrResponses;
 let solrResponsesIndex;
 let solrResponsesDirectory;
@@ -197,7 +198,7 @@ function startSolrFake( options ) {
         handler = normalHandler;
     }
 
-    http.createServer( handler ).listen( port )
+    server = http.createServer( handler ).listen( port )
         .on( 'listening', () => {
             logger.info( 'Solr fake is running on port ' + port );
         } )
@@ -208,6 +209,12 @@ function startSolrFake( options ) {
     process.on( 'SIGINT', signalEventHandler );
     process.on( 'SIGTERM', signalEventHandler );
     process.on( 'exit', exitHandler );
+}
+
+function stopSolrFake() {
+    server.close(() => {
+        logger.info( 'Solr fake has been stopped.' );
+    });
 }
 
 function updateSolrResponses( queryString, solrResponse ) {
@@ -254,4 +261,5 @@ async function updateSolrResponsesHandler( request, response ) {
 
 export {
     startSolrFake,
+    stopSolrFake,
 };
